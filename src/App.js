@@ -34,6 +34,7 @@ function App() {
     }).then(data=>{
       //have to tranform key apis -> self prj ket like in api there name differnet nd we have to convert into our sutiable name 
       const transFormedMovies = data.results.map(movieData =>{
+        
         return {
           id:movieData.episode_id,
           title: movieData.title,
