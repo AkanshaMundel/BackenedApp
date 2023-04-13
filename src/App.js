@@ -1,5 +1,5 @@
 import React, {useState , useEffect,useCallback} from 'react';
-
+import AddMovie from './components/AddMovie';
 import MoviesList from './components/MoviesList';
 import './App.css';
 
@@ -51,16 +51,26 @@ function App() {
   const fetchMovieHandler = useCallback(async ()=>{
     setIsLoading(true);
     setError(null);
-    try{
-      const response = await fetch('http://swapi.dev/api/films/');
-  
+    try{//this is rquest sending to firebase at last .json is imp 
+      // const response = await fetch('https://swapi.dev/api/films/');
+     const response = await fetch('https://filmspot-86bf8-default-rtdb.firebaseio.com/movies.json')
    if(!response.ok){
     throw new Error('something went wrong');
    }
    const data = await response.json(); 
+   const loadedMovies= [];
+    for(const key in data){
+      loadedMovies.push({
+        id: key,
+        title: data[key].title,
+        openingText : data[key].openingText,
+        realeaseDate: data[key].releaseDate,
+      });
+    }
 
    
-   //sync taks-->uses try nd catch 
+   //sync taks-->uses try nd catch, used in get the rep
+   /* 
    const transFormedMovies = data.results.map((movieData) =>{
         return {
           id:movieData.episode_id,
@@ -68,8 +78,8 @@ function App() {
           openingText: movieData.opening_crawl,
           releasedDate : movieData.release_date,
         };
-      });
-     setMovies( transFormedMovies); //using for the movie list
+      }); */
+     setMovies( loadedMovies); //using for the movie list
 
     }
     catch(error){
@@ -86,6 +96,20 @@ function App() {
       fetchMovieHandler();//showing dar after user visit ui  list directy whn wn
     },[fetchMovieHandler]);
 
+    async function addMovieHandler(movie) {
+      // console.log(movie);
+      //whenever ther is asyn so promise called 
+      const response = await fetch('https://filmspot-86bf8-default-rtdb.firebaseio.com/movies.json',{
+        method :'POST',
+        body:JSON.stringify(movie),//javascrit obj to json 
+        headers:{
+          'content-Type': 'application/json',
+        }
+      });
+      const data= await response.json();
+      console.log(data);
+    }
+
     let content = <p>Found no movies</p>;
     if(movies.length>0){
       content = <MoviesList movies= {movies} />
@@ -99,6 +123,9 @@ function App() {
 
   return (
     <React.Fragment>
+     <section>
+        <AddMovie onAddMovie={addMovieHandler} />
+      </section>
       <section>
         <button onClick = {fetchMovieHandler}>Fetch Movies</button>
       </section>
